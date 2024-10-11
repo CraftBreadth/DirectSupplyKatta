@@ -1,0 +1,8 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "jackson-databind-2.9.9.3.jar",
+        "jackson-databind-2.9.9.3-sources.jar"
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic"
+}
