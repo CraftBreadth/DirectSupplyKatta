@@ -1,23 +1,11 @@
 package com.directsupply;
 
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
-import java.net.http.HttpClient;
-import java.net.URI;
 import java.io.Console;
 import java.io.IOException;
 import com.google.gson.Gson;
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.MalformedURLException;
 import java.net.URL;
-
 import org.apache.commons.io.IOUtils;
-import java.nio.charset.StandardCharsets;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
 
 public class Main {
 
@@ -62,7 +50,7 @@ public class Main {
         int startQuestionIndex = 0;
         // Loop through each question
         for (int questionIndex = 0; questionIndex < numberOfQuestions; questionIndex++) {
-            // Find start curly index and end brace index
+            // Find start curly brace index and end curly brace index
             int currentIndex = endQuestionIndex + 1;
             while (true) {
                 if (jsonStream.charAt(currentIndex) == '{') {
