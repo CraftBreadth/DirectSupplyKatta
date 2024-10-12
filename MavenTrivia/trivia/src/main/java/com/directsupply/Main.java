@@ -6,6 +6,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.net.http.HttpClient;
 import java.net.URI;
+import java.io.Console;
 import java.io.IOException;
 import com.google.gson.Gson;
 import java.io.IOException;
@@ -21,55 +22,67 @@ import com.google.gson.stream.JsonToken;
 public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        System.out.println("Hello world!");
-        JSONtoQuestionList(CreateURL(1, QuestionType.MULTIPLECHOICE), 10);
+        Console console = System.console();
+        int numQuestions = Integer.parseInt(console.readLine("Enter the number of questions: "));
+        String readQuestionType = console.readLine("Choose Multiple choice (MC) or True False (TF) or both (B)");
+        QuestionType questionType = QuestionType.COMBINED;
+        if (readQuestionType.equals("TF")) {
+            questionType = QuestionType.TRUEFALSE;
+        } else if (readQuestionType.equals("MC")) {
+            questionType = QuestionType.MULTIPLECHOICE;
+        } else if (readQuestionType.equals("B")) {
+            questionType = QuestionType.COMBINED;
+        } else {
+            System.out.println("Invalid selection, using combined.");
+        }
+        Question[] questionList = JSONtoQuestionList(CreateURL(numQuestions, questionType), numQuestions);
 
     }
 
     public static String CreateURL(int numQuestions, QuestionType type) {
-        String outputString = "https://opentdb.com/api.php?amount=10&encode=url3986";
+        String questionTypeSelect = "";
+        if (type.equals(QuestionType.MULTIPLECHOICE)) {
+            questionTypeSelect = "&type=multiple";
+        } else if (type.equals(QuestionType.TRUEFALSE)) {
+            questionTypeSelect = "&type=boolean";
+        }
+
+        String outputString = "https://opentdb.com/api.php?amount=" + Integer.toString(numQuestions)
+                + questionTypeSelect + "&encode=url3986";
         return outputString;
     }
 
     public static Question[] JSONtoQuestionList(String JSONURL, int numberOfQuestions) throws IOException {
+        System.out.println("Preparing Questions!");
         String jsonStream = IOUtils.toString(new URL(JSONURL), StandardCharsets.ISO_8859_1);
         Question[] questionList = new Question[numberOfQuestions];
 
-        System.out.println("Done Reading!");
         int endQuestionIndex = 0;
-        //Avoid first curly brace
+        // Avoid first curly brace
         int startQuestionIndex = 0;
         // Loop through each question
         for (int questionIndex = 0; questionIndex < numberOfQuestions; questionIndex++) {
-
-            // Do Do string parser
-            // Find First curly index and second cury brace index
-            int currentIndex = endQuestionIndex+1;
+            // Find start curly index and end brace index
+            int currentIndex = endQuestionIndex + 1;
             while (true) {
-                if (jsonStream.charAt(currentIndex)=='{'){
+                if (jsonStream.charAt(currentIndex) == '{') {
                     startQuestionIndex = currentIndex;
                     currentIndex++;
-                } else if (jsonStream.charAt(currentIndex) == '}'){
+                } else if (jsonStream.charAt(currentIndex) == '}') {
                     endQuestionIndex = currentIndex;
                     break;
-                } else{
+                } else {
                     currentIndex++;
                 }
             }
-            String individualQuestionString = jsonStream.substring(startQuestionIndex, endQuestionIndex+1);
-
-            // Find Second Curly index
-
-            // Split string
-            // Move to next string.
-
+            // Split string via string indexes
+            String individualQuestionString = jsonStream.substring(startQuestionIndex, endQuestionIndex + 1);
             Gson gson = new Gson();
-            //Question question = gson.fromJson(individualQuestionString, Question.class);
+            // Create question based off of the string provided
             Question question = gson.fromJson(individualQuestionString, Question.class);
-            System.out.println("Creating a MC question");
             questionList[questionIndex] = question;
         }
-
+        System.out.println("Questions Ready!");
         return questionList;
     }
 }
