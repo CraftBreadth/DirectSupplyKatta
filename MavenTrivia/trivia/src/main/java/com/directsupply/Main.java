@@ -1,16 +1,21 @@
 package com.directsupply;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
+import java.util.random.RandomGenerator;
 import java.io.Console;
 import java.io.IOException;
 import com.google.gson.Gson;
 import java.net.URL;
+import java.net.URLDecoder;
+
 import org.apache.commons.io.IOUtils;
 
 public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Console console = System.console();
+        // Quiz Setup
         int numQuestions = Integer.parseInt(console.readLine("Enter the number of questions: "));
         String readQuestionType = console.readLine("Choose Multiple choice (MC) or True False (TF) or both (B)");
         QuestionType questionType = QuestionType.COMBINED;
@@ -24,6 +29,44 @@ public class Main {
             System.out.println("Invalid selection, using combined.");
         }
         Question[] questionList = JSONtoQuestionList(CreateURL(numQuestions, questionType), numQuestions);
+        // Quiz taking
+        int score = 0;
+        Question currentQuestion;
+        for (int questionNumber = 0; questionNumber < numQuestions; questionNumber++) {
+            currentQuestion = questionList[questionNumber];
+            // Print question number and question
+            System.out.println("\nQuestion #" + Integer.toString(questionNumber + 1) + ".");
+            System.out.println(URLDecoder.decode(currentQuestion.question, "UTF-8"));
+            // Randomly postion the correct answer in the list of questions.
+            Random r = new Random();
+            int randomNumber = r.nextInt(currentQuestion.incorrect_answers.length);
+            // Arrange incorrect and correct answers
+            for (int answerNumber = 0; answerNumber < currentQuestion.incorrect_answers.length + 1; answerNumber++) {
+                if (answerNumber == randomNumber) {
+                    System.out.println(Integer.toString(answerNumber) + ".  "
+                            + URLDecoder.decode(currentQuestion.correct_answer, "UTF-8"));
+                } else {
+                    // Need to realign the arrays if the answer has already been added
+                    if (randomNumber < answerNumber) {
+                        System.out.println(Integer.toString(answerNumber) + ".  "
+                                + URLDecoder.decode(currentQuestion.incorrect_answers[answerNumber - 1], "UTF-8"));
+                    } else {
+                        System.out.println(Integer.toString(answerNumber) + ".  "
+                                + URLDecoder.decode(currentQuestion.incorrect_answers[answerNumber], "UTF-8"));
+                    }
+                }
+            }
+            // Query user for correct answer
+            int userAnswer = Integer.parseInt(console.readLine("Type the number associated with the correct answer:"));
+            if (userAnswer != randomNumber) {
+                System.out.println("Incorrect! The correct answer was " + Integer.toString(randomNumber));
+            } else {
+                System.out.println("Correct! Adding one to your score!");
+                score++;
+            }
+        }
+        System.out.println(
+                "Overall you got " + Integer.toString(score) + "/" + Integer.toString(numQuestions) + " questions correct.");
 
     }
 
