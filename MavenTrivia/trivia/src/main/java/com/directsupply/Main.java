@@ -12,6 +12,7 @@ import java.net.URLDecoder;
 import org.apache.commons.io.IOUtils;
 
 /* Quiz program. Basic program that runs a simple trivia quiz for the user. Questions are selected from the Open Trivia API and displayed to the user. The quiz is then scored.
+ * Limitations: Max quiz size is 50 questions. Only runs through the command line. Does not handle failed API calls gracefully. Repeated quizzes may provide the same question (no session token stored).
  * 
  */
 
@@ -63,26 +64,31 @@ public class Main { // throws IOException, InterruptedException
             } else {
                 System.out.println("Invalid selection, using combined.");
             }
+
+            // Create a list of questions by first creating a custom URL and then passing it into the JSONtoQuestionList method
             Question[] questionList = JSONtoQuestionList(CreateURL(numQuestions, questionType), numQuestions);
 
             // Quiz taking
             int score = 0;
             Question currentQuestion;
+            // Define random outside of the for loop so it does not need to be constantly reinitialized
+            Random r = new Random();
             for (int questionNumber = 0; questionNumber < numQuestions; questionNumber++) {
                 currentQuestion = questionList[questionNumber];
                 // Print question number and question
                 System.out.println("\nQuestion #" + Integer.toString(questionNumber + 1) + ".");
-                System.out.println(URLDecoder.decode(currentQuestion.question, "UTF-8"));
+                System.out.println(URLDecoder.decode(currentQuestion.question, "UTF-8")); // note UTF-8 decoding so that questions are rendered correctly
                 // Randomly position the correct answer in the list of questions.
-                Random r = new Random();
                 int randomNumber = r.nextInt(currentQuestion.incorrect_answers.length);
                 // Arrange incorrect and correct answers
                 for (int answerNumber = 0; answerNumber < currentQuestion.incorrect_answers.length
                         + 1; answerNumber++) {
+                    // Correct answer
                     if (answerNumber == randomNumber) {
                         System.out.println(Integer.toString(answerNumber) + ".  "
                                 + URLDecoder.decode(currentQuestion.correct_answer, "UTF-8"));
                     } else {
+                        // Incorrect answer
                         // Need to realign the arrays if the answer has already been added
                         if (randomNumber < answerNumber) {
                             System.out.println(Integer.toString(answerNumber) + ".  "
