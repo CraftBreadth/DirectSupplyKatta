@@ -1,10 +1,8 @@
 package com.directsupply;
 
-import java.io.IOException;
-
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-
+/* Very basic class to store question information. Could be changed to use private variables and getters/setters.
+ * 
+ */
 public class Question {
     public int rightAnswerNumber;
     public String difficulty;
